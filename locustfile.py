@@ -13,7 +13,7 @@ from locust import HttpUser, task, between
 #
 
 try:
-    GREENBAY_API_KEY = os.environment['GREENBAY_API_KEY']
+    GREENBAY_API_KEY = os.environ['GREENBAY_API_KEY']
 except KeyError:
     GREENBAY_API_KEY = "" # Error, this needs to be set as environment variable
 
