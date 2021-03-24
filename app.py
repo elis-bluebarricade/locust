@@ -17,6 +17,6 @@ os.system("python setup.py install")
 if LOCUST_SETTING.lower() == "master":
     os.system("locust -f locustfile.py --master --web-port 8080")
 elif LOCUST_SETTING.lower() == "slave" or LOCUST_SETTING.lower() == "worker":
-    os.system("locust -f locustfile.py --worker)
+    os.system("locust -f locustfile.py --worker")
 else:
     os.system("locust -f locustfile.py --web-port 8080")
