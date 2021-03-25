@@ -1,47 +1,73 @@
 import os
 
-import random
-from locust import HttpUser, task, between
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# use this URL for this demo
-# url https://blockchain-api-blockchain-project.apps.ocp1.ocp.hcl.local/greenbay-channel
+from locust import task, TaskSet, HttpUser
+from locust.contrib.fasthttp import FastHttpUser
+
+import greenlet
+import logging, sys
 
 # Environment Variables
 #
-# GREENBAY_API_KEY
+# BB_API_KEY
 #    this needs to be set for this demo locustfile
 #
+# LOCUST_WORKER_ID
+#    set this on the client, dictates the blockchain address range used 
+#
+
+# https://blockchain-api-blockchain-project.apps.ocp1.ocp.hcl.local/greenbay-network
 
 try:
-    GREENBAY_API_KEY = os.environ['GREENBAY_API_KEY']
+    LOCUST_WORKER_ID = os.environ['LOCUST_WORKER_ID']
 except KeyError:
-    GREENBAY_API_KEY = "" # Error, this needs to be set as environment variable
+    LOCUST_WORKER_ID = 0 # default to first worker address range
 
-class TestPoC2(HttpUser):
-    wait_time = between(1, 2.5)
+try:
+    BB_API_KEY = os.environ['BB_API_KEY']
+except KeyError:
+    BB_API_KEY = "" # Error, this needs to be set as environment variable
+
+#   index   sender  receiver
+#   0       0       1
+#   1       2       3
+#   2       4       5
+#   3       6       7
+#   4       8       9
+#   5       10      11
+#   ...     ...     ...
+
+#def get_ids(index):
+#    sender = index*2
+#    receiver = index*2+1
+
+def get_addresses(index):
+    sender_addr = "worker_{}_addr_{}".format(LOCUST_WORKER_ID, index*2)
+    receiver_addr = "worker_{}_addr_{}".format(LOCUST_WORKER_ID, index*2+1)
+    return (sender_addr, receiver_addr)
+
+class BlueBarricadeUser(FastHttpUser):
+
+    user_id = -1
+    sender_addr = ""
+    receiver_addr = ""
+
+    def on_start(self):
+        self.user_id = greenlet.getcurrent().minimal_ident
+        self.sender_addr, self.receiver_addr = get_addresses(self.user_id)
+        print("\n\n{} : {}, {}".format(self.user_id, self.sender_addr, self.receiver_addr))
 
     @task
-    def getTransactionInfo(self):
-        self.client.post("/getTransactionInfo", verify=False,
-            headers={"API_KEY" : GREENBAY_API_KEY},
-            json={"txId": "ef759d6bd85f9a5ffd5c20ac83ad177372002f3cf3b8e916a4a39c6a73b66595"},
-        )
-
-    @task
-    def getAddressInfo(self):
-        for i in range(10):
-            self.client.post("/getAddressInfo", verify=False, 
-                headers={"API_KEY" : GREENBAY_API_KEY},
-                json={"address": "test_address_" + str(random.randint(1, 99))	},
-            )
-
-    @task
-    def listTransaction(self):
-        self.client.post("/listTransaction", verify=False,
-            headers={"API_KEY" : api_key},
-            json={    
-                "pageSize": 10,
-                "bookMark": "",
-                "eventType": "all" 
+    def transfer(self):
+        self.client.post("/api/transfer", verify=False,
+            headers={"API_KEY" : BB_API_KEY},
+            json={
+                "senderAddress": self.sender_addr,
+                "receiverAddress": self.receiver_addr,
+                "sendAmount": 1,
+                "receiveAmount": 0.8
             },
         )
+        
