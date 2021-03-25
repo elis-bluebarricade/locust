@@ -61,7 +61,7 @@ class BlueBarricadeUser(FastHttpUser):
 
     @task
     def transfer(self):
-        self.client.post("/transfer", verify=False,
+        self.client.post("/transferMoney", verify=False,
             headers={"API_KEY" : BB_API_KEY},
             json={
                 "senderAddress": self.sender_addr,
