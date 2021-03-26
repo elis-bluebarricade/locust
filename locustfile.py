@@ -61,7 +61,7 @@ class BlueBarricadeUser(FastHttpUser):
 
     @task
     def transfer(self):
-        self.client.post("/transferMoney", verify=False,
+        with self.client.post("/transferMoney", verify=False, catch_response=True,
             headers={"API_KEY" : BB_API_KEY},
             json={
                 "senderAddress": self.sender_addr,
@@ -69,5 +69,8 @@ class BlueBarricadeUser(FastHttpUser):
                 "sendAmount": 1,
                 "receiveAmount": 0.8
             },
-        )
+        ) as response:
+            # print(response.text)
+            if response.text.find("txId") == -1:
+                response.failure("Response Error: Couldn't find txId")
         
