@@ -74,7 +74,10 @@ class BlueBarricadeUser(FastHttpUser):
             },
         ) as response:
             # print(response.text)
-            if response.text.find("txId") == -1:
-                response.failure("Response Error: Couldn't find txId" + response.text)
+            if response.text:
+                if response.text.find("txId") == -1:
+                    response.failure("Response Error: Couldn't find txId" + response.text)
+            else:
+                response.failure("Error: missing response.text")
                
         
