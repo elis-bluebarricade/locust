@@ -14,16 +14,16 @@ import logging, sys
 # BB_API_KEY
 #    this needs to be set for this demo locustfile
 #
-# LOCUST_WORKER_ID
+# LOCUST_WORKER_ID (NOT USED)
 #    set this on the client, dictates the blockchain address range used 
 #
 
 # https://blockchain-api-blockchain-project.apps.ocp1.ocp.hcl.local/greenbay-network
 
-try:
-    LOCUST_WORKER_ID = os.environ['LOCUST_WORKER_ID']
-except KeyError:
-    LOCUST_WORKER_ID = 0 # default to first worker address range
+# try:
+#     LOCUST_WORKER_ID = os.environ['LOCUST_WORKER_ID']
+# except KeyError:
+#     LOCUST_WORKER_ID = 0 # default to first worker address range
 
 try:
     BB_API_KEY = os.environ['BB_API_KEY']
@@ -43,31 +43,32 @@ except KeyError:
 #    sender = index*2
 #    receiver = index*2+1
 
-def get_addresses(index):
-    sender_addr = "worker_{}_addr_{}".format(LOCUST_WORKER_ID, index*2)
-    receiver_addr = "worker_{}_addr_{}".format(LOCUST_WORKER_ID, index*2+1)
-    return (sender_addr, receiver_addr)
+# def get_addresses(index):
+#     sender_addr = "worker_{}_addr_{}".format(LOCUST_WORKER_ID, index*2)
+#     receiver_addr = "worker_{}_addr_{}".format(LOCUST_WORKER_ID, index*2+1)
+#     return (sender_addr, receiver_addr)
 
 class BlueBarricadeUser(FastHttpUser):
 
-    user_id = -1
-    sender_addr = ""
-    receiver_addr = ""
+    # user_id = -1
+    # sender_addr = ""
+    # receiver_addr = ""
 
     def on_start(self):
-        self.user_id = greenlet.getcurrent().minimal_ident
+        print("user {} started.\n".format(greenlet.getcurrent().minimal_ident))
+        # self.user_id = greenlet.getcurrent().minimal_ident
         # self.sender_addr, self.receiver_addr = get_addresses(self.user_id)
-        self.sender_addr = self.user_id
-        self.receiver_addr = self.user_id
-        print("\n\n{} : {}, {}".format(self.user_id, self.sender_addr, self.receiver_addr))
+        # self.sender_addr = self.user_id
+        # self.receiver_addr = self.user_id
+        # print("\n\n{} : {}, {}".format(self.user_id, self.sender_addr, self.receiver_addr))
 
     @task
     def transfer(self):
         with self.client.post("/transferMoneyExperimental", verify=False, catch_response=True,
             headers={"API_KEY" : BB_API_KEY},
             json={
-                "senderAddress": self.sender_addr,
-                "receiverAddress": self.receiver_addr,
+                "senderAddress": "experimantal_senderAddress",
+                "receiverAddress": "experimental_receiverAddress",
                 "sendAmount": 1,
                 "receiveAmount": 0.8
             },
