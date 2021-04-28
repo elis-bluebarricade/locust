@@ -9,6 +9,9 @@ from locust.contrib.fasthttp import FastHttpUser
 import greenlet
 import logging, sys
 
+import json
+from json import JSONDecodeError
+
 # Environment Variables
 #
 # BB_API_KEY
@@ -73,11 +76,26 @@ class BlueBarricadeUser(FastHttpUser):
                 "receiveAmount": 0.8
             },
         ) as response:
-            # print(response.text)
-            if response.text:
-                if response.text.find("txId") == -1:
-                    response.failure("Response Error: Couldn't find txId" + response.text)
-            else:
-                response.failure("Error: missing response.text")
-               
-        
+            try:
+                # print("HTTP status: " + str(response.status_code))
+                if response.status_code != 200:
+                    response.failure("Response Error: HTTP status: " + str(response.status_code))
+                else:
+                    jsonResponse = response.json()
+                    if jsonResponse["success"] == True:
+                        if jsonResponse["result"]["txId"]:
+                            # print("OK, Got txId: " + jsonResponse["result"]["txId"])
+                            response.success()
+                        else:
+                            response.failure("Response Error: Success but no txid: " + response.text)
+                    else:
+                        message = jsonResponse["message"]
+                        try:
+                            jsonMessage = json.loads(message)
+                            response.failure("Response Error (success==false) inner message: " + jsonMessage["message"])
+                        except:
+                            response.failure("Response Error (success==false) message: " + message)
+            except JSONDecodeError:
+                response.failure("Response Error (JSONDecodeError) : " + response.text)
+            except:
+                response.failure("Response Error (exception): " + response.text)
