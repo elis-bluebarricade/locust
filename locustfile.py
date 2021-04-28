@@ -58,7 +58,7 @@ class BlueBarricadeUser(FastHttpUser):
     # receiver_addr = ""
 
     def on_start(self):
-        print("user {} started.\n".format(greenlet.getcurrent().minimal_ident))
+        # print("user {} started.\n".format(greenlet.getcurrent().minimal_ident))
         # self.user_id = greenlet.getcurrent().minimal_ident
         # self.sender_addr, self.receiver_addr = get_addresses(self.user_id)
         # self.sender_addr = self.user_id
