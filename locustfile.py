@@ -28,13 +28,13 @@ except KeyError:
 class BlueBarricadeUser(FastHttpUser):
     wait_time = between(0, 0)
 
-    def on_start(self):
-        print(self.host)
+    #def on_start(self):
+    #    print(self.host)
 
     @task
     def myTask(self):
         self.api_call = self.host.split('/')[-1]
-        print(self.api_call)
+        # print(self.api_call)
         if self.api_call == "transferMoneyExperimental":
             self.transfer()
         else:
