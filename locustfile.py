@@ -82,7 +82,7 @@ class BlueBarricadeUser(FastHttpUser):
 
     def generic(self):
         #with self.client.post("", verify=False, catch_response=True,
-        with self.client.post("", name=self.host, verify=False, catch_response=True,
+        with self.client.post(self.host, name=self.host, verify=False, catch_response=True,
             headers={"API_KEY" : BB_API_KEY},
             json={
             },
