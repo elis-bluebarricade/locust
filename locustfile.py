@@ -12,7 +12,7 @@ import logging, sys
 import json
 from json import JSONDecodeError
 
-import time
+import random
 
 # Environment Variables
 #
@@ -28,21 +28,26 @@ except KeyError:
 class BlueBarricadeUser(FastHttpUser):
     wait_time = between(0, 0)
 
-    #def on_start(self):
-    #    print(self.host)
+    def on_start(self):
+        
+        self.host_list = self.host.split(';')
+        if self.host[-1] == ";":
+            self.host_list = self.host_list[:-1]
 
     @task
     def myTask(self):
+
+        self.host = random.choice(self.host_list) # set host to random from host_list
+
         self.api_call = self.host.split('/')[-1]
-        # print(self.api_call)
         if self.api_call == "transferMoneyExperimental":
             self.transfer()
         else:
             self.generic()
-            #time.sleep(1)
     
     def transfer(self):
-        with self.client.post("", verify=False, catch_response=True,
+        #with self.client.post("", verify=False, catch_response=True,
+        with self.client.post(self.host, name=self.host, verify=False, catch_response=True,
             headers={"API_KEY" : BB_API_KEY},
             json={
                 "senderAddress": "experimental_senderAddress",
@@ -76,7 +81,8 @@ class BlueBarricadeUser(FastHttpUser):
                 response.failure("Response Error (exception): " + response.text)
 
     def generic(self):
-        with self.client.post("", verify=False, catch_response=True,
+        #with self.client.post("", verify=False, catch_response=True,
+        with self.client.post("", name=self.host, verify=False, catch_response=True,
             headers={"API_KEY" : BB_API_KEY},
             json={
             },
