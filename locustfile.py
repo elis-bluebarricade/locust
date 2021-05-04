@@ -58,7 +58,7 @@ class BlueBarricadeUser(FastHttpUser):
         ) as response:
             try:
                 # print("HTTP status: " + str(response.status_code))
-                if response.status_code != 200:
+                if response.status_code < 200 or response.status_code >= 300:
                     response.failure("Response Error: HTTP status: " + str(response.status_code))
                 else:
                     jsonResponse = response.json()
@@ -87,7 +87,7 @@ class BlueBarricadeUser(FastHttpUser):
             json={
             },
         ) as response:
-            if response.status_code != 200:
-                response.failure("Response Error: HTTP status: " + str(response.status_code))
+            if response.status_code < 200 or response.status_code >= 300:
+                response.failure("Response Error: HTTP status: " + str(response.status_code) + " : " + str(response.text))
             else:
                 response.success()
